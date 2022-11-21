@@ -1,0 +1,5 @@
+data/train_images
+data/dev_images
+data/test_images
+
+__pycache__
