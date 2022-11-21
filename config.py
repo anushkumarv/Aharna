@@ -9,11 +9,15 @@ config = {
     'dev_img': '',
     'test_img': '',
 
-    #separatot for text
+    # dataloaders
+    'batch_size': 64,
+    'num_workers': 4,
+
+    ## separator for text
     'text_sep': ' and ',
     # 'text_sep': ' ',
 
-    #clip backend
+    ## clip backend
     'clip_backend': 'ViT-B/32',
     # 'clip_backend': 'ViT-L/14',
 }
