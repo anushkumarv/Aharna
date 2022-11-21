@@ -11,7 +11,7 @@ import torch.utils.data as data
 import os 
 
 
-class TrainDatasetOnline(data.Dataset):
+class TrainClipDatasetOnline(data.Dataset):
 
     def __init__(self, config: dict, transforms: None) -> None:
         super().__init__()
