@@ -78,7 +78,7 @@ class TrainClipDatasetOnline(data.Dataset):
             self.train_query_net_emb = query_em
 
     def _prepare_embeddings(self):
-        src_file = os.path.join(self.config.get('data_root') + self.config.get('train_csv'))
+        src_file = os.path.join(self.config.get('data_root'), self.config.get('train_csv'))
         df = pd.read_csv(src_file)
         for _, row in df.iterrows:
             try:
