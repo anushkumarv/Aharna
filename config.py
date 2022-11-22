@@ -9,7 +9,7 @@ config = {
     'dev_img': '',
     'test_img': '',
 
-    # dataloaders
+    ## dataloaders
     'batch_size': 64,
     'num_workers': 4,
 
