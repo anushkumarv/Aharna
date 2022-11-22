@@ -13,7 +13,7 @@ import os
 
 class TrainClipDatasetOnline(data.Dataset):
 
-    def __init__(self, config: dict, transforms: None) -> None:
+    def __init__(self, config: dict, transforms=None) -> None:
         super().__init__()
         self.config = config
         self.transforms = transforms
