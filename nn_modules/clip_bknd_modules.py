@@ -3,6 +3,7 @@ from torch import nn
 
 class ClipBackendB32QueryNet(nn.Module):
     def __init__(self):
+        super(ClipBackendB32QueryNet, self).__init__()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.query_net = nn.Sequential(nn.Linear(1024, 512, device=self.device),
                                         nn.ReLU(),
@@ -16,6 +17,7 @@ class ClipBackendB32QueryNet(nn.Module):
 
 class ClipBackendB32CompressNet(nn.Module):
     def __init__(self):
+        super(ClipBackendB32CompressNet, self).__init__()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.compress_net = nn.Sequential(nn.Linear(512, 128, device=self.device),
                                             nn.ReLU())
@@ -26,6 +28,7 @@ class ClipBackendB32CompressNet(nn.Module):
 
 class ClipBackendL14QueryNet(nn.Module):
     def __init__(self):
+        super(ClipBackendL14QueryNet, self).__init__()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.query_net = nn.Sequential(nn.Linear(1536, 512, device=self.device),
                                         nn.ReLU(),
@@ -39,6 +42,7 @@ class ClipBackendL14QueryNet(nn.Module):
 
 class ClipBackendL14CompressNet(nn.Module):
     def __init__(self):
+        super(ClipBackendL14CompressNet, self).__init__()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.compress_net = nn.Sequential(nn.Linear(768, 128, device=self.device),
                                             nn.ReLU())
