@@ -16,6 +16,9 @@ config = {
     'num_workers': 4,
     'random_seed': 1,
     'learning_rate': 0.001,
+    'shuffle_data': False,
+    'split_train_into_val': True,
+    'validation_split': 0.2,
 
     ## separator for text
     'text_sep': ' and ',
