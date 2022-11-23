@@ -34,7 +34,7 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
             cos = nn.CosineSimilarity(dim=2, eps=1e-6)
             y_hat = cos(cnet_y, qnet_y)
             batch_size = len(cnet_x)
-            y = torch.tensor([1.0,0.0]).repeat(batch_size, 1)
+            y = torch.tensor([1.0,0.0]).repeat(batch_size, 1).to(device)
             loss = loss_fn(y, y_hat)
             loss.backward()
             optimizer.step()
