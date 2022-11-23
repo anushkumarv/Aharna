@@ -22,7 +22,13 @@ class TrainClipDatasetOnline(data.Dataset):
         self.model, self.preprocess = clip.load(config.get('clip_backend'), device=self.device)
         self.train_compress_net_emb = None 
         self.train_query_net_emb = None
-        self._prepare_embeddings()
+        if os.path.exists(config.get('train_cnet_em')) and os.path.exists(config.get('train_qnet_em')):
+            self.train_compress_net_emb = torch.load(config.get('train_cnet_em'))
+            self.train_query_net_emb = torch.load(config.get('train_qnet_em'))
+        else:
+            self._prepare_embeddings()
+            torch.save(self.train_compress_net_emb, config.get('train_cnet_em'))
+            torch.save(self.train_query_net_emb, config.get('train_qnet_em'))
 
     def __getitem__(self, index):
         return self.train_compress_net_emb[index], self.train_query_net_emb[index]
