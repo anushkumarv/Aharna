@@ -10,6 +10,8 @@ config = {
     'test_img': '',
     'train_qnet_em': './data/clip_train/train_qnet_em.pt',
     'train_cnet_em': './data/clip_train/train_cnet_em.pt',
+    'cap_datapoints': True,
+    'max_datapoints': 100,
 
     ## hyperparameters
     'batch_size': 64,

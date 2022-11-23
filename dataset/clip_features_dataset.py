@@ -87,8 +87,11 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
     def _prepare_embeddings(self):
         src_file = os.path.join(self.config.get('data_root'), self.config.get('train_csv'))
         df = pd.read_csv(src_file)
+        count = 0
         for _, row in tqdm(df.iterrows()):
             try:
+                if self.config.get('cap_datapoints') and count == self.config.get('max_datapoints'):
+                    break
                 all_img_emb = self._get_image_embedding(self._download_image(row['Source Image ID']), 
                                         self._download_image(row['Target Image ID']),
                                         self._download_image(row['Non-Target Image ID']))
