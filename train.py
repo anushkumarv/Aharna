@@ -12,7 +12,7 @@ from torch import nn
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-def display_loss_curve(history, title):
+def display_loss_curve(history, title, save_img_file):
     loss = history['loss']
     # val_loss = history['val_loss']
     epochs = list(range(1, len(loss) + 1))
@@ -23,7 +23,7 @@ def display_loss_curve(history, title):
     plt.title(title)
     plt.legend()
     plt.show()
-    plt.savefig('loss_curve.png')
+    plt.savefig(save_img_file)
 
 print("preparing dataset and dataloader")
 train_data_loader = torch.utils.data.DataLoader(
@@ -44,5 +44,5 @@ opt = torch.optim.Adam(list(cnet_model.parameters()) + list(qnet_model.parameter
 
 history = joint_trainning(cnet_model, qnet_model, opt, loss, train_data_loader, None, 10, device)
 
-display_loss_curve(history, "cnet and qnet loss")
+display_loss_curve(history, "cnet and qnet loss", config.get('clip_crs_em_loss.png'))
 
