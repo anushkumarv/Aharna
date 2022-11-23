@@ -19,6 +19,9 @@ config = {
     'text_sep': ' and ',
     # 'text_sep': ' ',
 
+    ## matplotlib loss curve file
+    'clip_crs_em_loss_img': 'clip_crs_em_loss.png',
+
     ## clip backend
     'clip_backend': 'ViT-B/32',
     # 'clip_backend': 'ViT-L/14',
