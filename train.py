@@ -44,5 +44,5 @@ opt = torch.optim.Adam(list(cnet_model.parameters()) + list(qnet_model.parameter
 
 history = joint_trainning(cnet_model, qnet_model, opt, loss, train_data_loader, None, 10, device)
 
-display_loss_curve(history, "cnet and qnet loss", config.get('clip_crs_em_loss.png'))
+display_loss_curve(history, "cnet and qnet loss", config.get('clip_crs_em_loss_img'))
 
