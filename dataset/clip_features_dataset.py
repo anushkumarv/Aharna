@@ -97,6 +97,7 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
                                         self._download_image(row['Non-Target Image ID']))
                 txt_em = self._get_text_embeddings(row['Feedback 1'], row['Feedback 2'], row['Feedback 3'])
                 self._stack_embeddings(all_img_emb, txt_em)
+                count += 1
             except Exception as e:
                 continue
 
