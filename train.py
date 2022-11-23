@@ -2,10 +2,11 @@ from config import config
 from dataset import clip_features_dataset
 from joint_training import joint_trainning
 from nn_modules import clip_bknd_modules
-from torch import nn
 
 import matplotlib.pyplot as plt
+
 import torch
+from torch import nn
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -22,6 +23,7 @@ def display_loss_curve(history, title):
     plt.legend()
     plt.show()
 
+print("preparing dataset and dataloader")
 train_data_loader = torch.utils.data.DataLoader(
         clip_features_dataset.TrainClipDatasetOnline(config=config),
         batch_size=config.get('batch_size'),
@@ -30,6 +32,7 @@ train_data_loader = torch.utils.data.DataLoader(
         pin_memory=True,
     )
 
+print("starting training")
 loss = nn.CrossEntropyLoss()
 cnet_model = clip_bknd_modules.ClipBackendB32CompressNet()
 qnet_model = clip_bknd_modules.ClipBackendB32QueryNet()

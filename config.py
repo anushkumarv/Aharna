@@ -8,6 +8,8 @@ config = {
     'train_img': '',
     'dev_img': '',
     'test_img': '',
+    'train_qnet_em': './data/clip_train/train_qnet_em.pt',
+    'train_cnet_em': './data/clip_train/train_cnet_em.pt',
 
     ## dataloaders
     'batch_size': 64,

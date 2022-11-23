@@ -27,15 +27,15 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
 
             optimizer.zero_grad()
 
-            cnet_x = batch[0]
-            qnet_x = batch[1]
+            cnet_x = batch[0].to(device)
+            qnet_x = batch[1].to(device)
             cnet_y = compress_net_model(cnet_x)
             qnet_y = query_net_model(qnet_x)
             cos = nn.CosineSimilarity(dim=2, eps=1e-6)
             y_hat = cos(cnet_y, qnet_y)
             batch_size = len(cnet_x)
             y = torch.tensor([1.0,0.0]).repeat(batch_size, 1)
-            loss = loss_fn(y_hat, y)
+            loss = loss_fn(y, y_hat)
             loss.backward()
             optimizer.step()
 
@@ -64,9 +64,9 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
         #     val_loss = val_loss / len(val_dl.dataset)
 
 
-        #     if epoch == 1 or epoch % 2 == 0:
-        #         print('Epoch %3d/%3d, train loss: %5.2f, val loss: %5.2f' % \
-        #             (epoch, epochs, train_loss, val_loss))
+        if epoch == 1 or epoch % 2 == 0:
+            print('Epoch %3d/%3d, train loss: %5.2f' % \
+                (epoch, epochs, train_loss))
 
         history['loss'].append(train_loss)
         #     history['val_loss'].append(val_loss)

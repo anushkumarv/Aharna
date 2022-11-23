@@ -1,5 +1,6 @@
 data/train_images
 data/dev_images
 data/test_images
+data/clip_train
 
 __pycache__
