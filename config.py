@@ -11,9 +11,11 @@ config = {
     'train_qnet_em': './data/clip_train/train_qnet_em.pt',
     'train_cnet_em': './data/clip_train/train_cnet_em.pt',
 
-    ## dataloaders
+    ## hyperparameters
     'batch_size': 64,
     'num_workers': 4,
+    'random_seed': 1,
+    'learning_rate': 0.001,
 
     ## separator for text
     'text_sep': ' and ',

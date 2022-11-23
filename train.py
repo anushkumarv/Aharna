@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import torch
 from torch import nn
 
+torch.manual_seed(config.get('random_seed'))
+
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -40,7 +42,7 @@ cnet_model = clip_bknd_modules.ClipBackendB32CompressNet()
 qnet_model = clip_bknd_modules.ClipBackendB32QueryNet()
 cnet_model.to(device=device)
 qnet_model.to(device=device)
-opt = torch.optim.Adam(list(cnet_model.parameters()) + list(qnet_model.parameters()), lr = 0.0001)
+opt = torch.optim.Adam(list(cnet_model.parameters()) + list(qnet_model.parameters()), lr = config.get('learning_rate'))
 
 history = joint_trainning(cnet_model, qnet_model, opt, loss, train_data_loader, None, 10, device)
 
