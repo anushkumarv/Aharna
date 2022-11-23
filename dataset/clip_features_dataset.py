@@ -4,6 +4,7 @@ import pandas as pd
 from PIL import Image
 import requests
 import re
+from tqdm import tqdm
 
 import torch
 import torch.utils.data as data
@@ -17,7 +18,7 @@ class TrainClipDatasetOnline(data.Dataset):
         super().__init__()
         self.config = config
         self.transforms = transforms
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = "cpu"
         self.model, self.preprocess = clip.load(config.get('clip_backend'), device=self.device)
         self.train_compress_net_emb = None 
         self.train_query_net_emb = None
@@ -27,15 +28,15 @@ class TrainClipDatasetOnline(data.Dataset):
         return self.train_compress_net_emb[index], self.train_query_net_emb[index]
 
     def __len__(self):
-        return self.train_image_emb.shape[0]
+        return len(self.train_compress_net_emb)
 
     def _download_image(self, img_id):
         try:
             image = Image.open(requests.get(self.config.get('url_root') + img_id + '.jpg', stream=True).raw)
         except Exception as e:
             raise Exception
-        if self.transform is not None:
-            image = self.transform(image)
+        if self.transforms is not None:
+            image = self.transforms(image)
 
         return image
 
@@ -67,12 +68,12 @@ class TrainClipDatasetOnline(data.Dataset):
         tgt_ntgt_img_emb = tgt_ntgt_img_emb.unsqueeze(0)
         query_em = torch.cat((src_img_em, text_em), dim=1).unsqueeze(0)
 
-        if self.train_compress_net_emb:
+        if self.train_compress_net_emb is not None:
             self.train_compress_net_emb = torch.vstack((self.train_compress_net_emb,tgt_ntgt_img_emb))
         else:
             self.train_compress_net_emb = tgt_ntgt_img_emb
 
-        if self.train_query_net_emb:
+        if self.train_query_net_emb is not None:
             self.train_query_net_emb = torch.vstack((self.train_query_net_emb, query_em))
         else:
             self.train_query_net_emb = query_em
@@ -80,7 +81,7 @@ class TrainClipDatasetOnline(data.Dataset):
     def _prepare_embeddings(self):
         src_file = os.path.join(self.config.get('data_root'), self.config.get('train_csv'))
         df = pd.read_csv(src_file)
-        for _, row in df.iterrows:
+        for _, row in tqdm(df.iterrows()):
             try:
                 all_img_emb = self._get_image_embedding(self._download_image(row['Source Image ID']), 
                                         self._download_image(row['Target Image ID']),
