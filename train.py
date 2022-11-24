@@ -79,7 +79,7 @@ cnet_model.to(device=device)
 qnet_model.to(device=device)
 opt = torch.optim.Adam(list(cnet_model.parameters()) + list(qnet_model.parameters()), lr = config.get('learning_rate'))
 
-history = joint_trainning(cnet_model, qnet_model, opt, loss, train_data_loader, val_data_loader, 10, device)
+history = joint_trainning(cnet_model, qnet_model, opt, loss, train_data_loader, val_data_loader, config.get('epochs'), device)
 
-display_loss_curve(history, "cnet and qnet loss", config.get('clip_crs_em_loss_img'))
+display_loss_curve(history, "cnet and qnet loss", config.get('clip_crs_em_loss_img'), include_val_loss=config.get('split_train_into_val'))
 
