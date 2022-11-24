@@ -2,5 +2,6 @@ data/train_images
 data/dev_images
 data/test_images
 data/clip_train
+data/dev_phase_results
 
 __pycache__
