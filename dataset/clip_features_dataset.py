@@ -1,5 +1,6 @@
 import clip
 
+import json
 import pandas as pd
 from PIL import Image
 import requests
@@ -102,5 +103,75 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
                 continue
 
 
+class PrdFeedbackClipBkdDevDataset(data.Dataset):
+    def __init__(self, config: dict, transforms = None):
+        super().__init__()
+        self.config = config
+        self.transforms = transforms
+        self.device = "cpu"
+        self.model, self.preprocess = clip.load(config.get('clip_backend'), device=self.device)
+        self.dev_query_net_emb = None
+        if os.path.exists(config.get('dev_qnet_em')):
+            self.dev_query_net_emb = torch.load(config.get('dev_qnet_em'))
+        else:
+            self._prepare_embeddings()
+            torch.save(self.dev_query_net_emb, config.get('dev_qnet_em'))
 
+    def __getitem__(self, index):
+        return self.dev_query_net_emb[index]
+
+    def __len__(self):
+        return len(self.dev_query_net_emb)
+
+    def _download_image(self, img_id):
+        try:
+            image = Image.open(requests.get(self.config.get('url_root') + img_id + '.jpg', stream=True).raw)
+        except Exception as e:
+            raise Exception
+        if self.transforms is not None:
+            image = self.transforms(image)
+
+        return image
+
+    def _get_image_embedding(self, src_image):
+        src_image = self.preprocess(src_image).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            src_image_features = self.model.encode_image(src_image)
+        return src_image_features
+
+    def _preprocess_text(self, text):
+        return re.sub(r'[^A-Za-z0-9 ]+', '', text).lower()
+
+    def _get_text_embeddings(self, text1, text2, text3):
+        text = self._preprocess_text(text1) + self.config.get('text_sep') +\
+               self._preprocess_text(text2) + self.config.get('text_sep') +\
+               self._preprocess_text(text3)
+
+        text = clip.tokenize(text).to(self.device)
+        with torch.no_grad():
+            text_emb = self.model.encode_text(text)
+
+        return text_emb
+
+    def _stack_embeddings(self, src_img_em, text_em):
+        query_em = torch.cat((src_img_em, text_em), dim=1).unsqueeze(0)
+
+        if self.dev_query_net_emb is not None:
+            self.dev_query_net_emb = torch.vstack((self.dev_query_net_emb, query_em))
+        else:
+            self.dev_query_net_emb = query_em
+
+    def _prepare_embeddings(self):
+        src_file = os.path.join(self.config.get('data_root'), self.config.get('dev_jsonl'))
+        with open(src_file, 'r') as jsonl_file:
+            json_str = jsonl_file.read()
+
+        data = [json.loads(json_item) for json_item in json_str.splitlines()]
+        for item in tqdm(data):
+            try:
+                src_img_em = self._get_image_embedding(self._download_image(item['source_pid']))
+                text_em = self._get_text_embeddings(item['feedback1'],item['feedback2'],item['feedback3'])
+                self._stack_embeddings(src_img_em, text_em)
+            except Exception as e:
+                continue    
 
