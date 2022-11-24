@@ -8,8 +8,8 @@ config = {
     'train_img': '',
     'dev_img': '',
     'test_img': '',
-    'train_qnet_em': './data/clip_train/train_qnet_em.pt',
-    'train_cnet_em': './data/clip_train/train_cnet_em.pt',
+    'train_qnet_em': './data/clip_bknd/train_qnet_em.pt',
+    'train_cnet_em': './data/clip_bknd/train_cnet_em.pt',
     'cap_datapoints': True,
     'max_datapoints': 100,
 
