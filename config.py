@@ -21,6 +21,7 @@ config = {
     'shuffle_data': False,
     'split_train_into_val': True,
     'validation_split': 0.2,
+    'epochs': 50,
 
     ## separator for text
     'text_sep': ' and ',
