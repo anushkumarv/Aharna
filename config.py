@@ -42,5 +42,6 @@ config = {
     'clip_bknd_qnet_model_path': '',
     'gal_imgs_ftrs_path': '',
     'qry_ftrs_path': '',
+    'dev_phase_res_file': 'data/dev_phase_results.jsonl'
 
 }
