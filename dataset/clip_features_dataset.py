@@ -170,8 +170,9 @@ class PrdFeedbackClipBkdDevDataset(data.Dataset):
         for item in tqdm(data):
             try:
                 src_img_em = self._get_image_embedding(self._download_image(item['source_pid']))
+            except Exception as e:
+                src_img_em = torch.zeros(1,128)    
                 text_em = self._get_text_embeddings(item['feedback1'],item['feedback2'],item['feedback3'])
                 self._stack_embeddings(src_img_em, text_em)
-            except Exception as e:
-                continue    
+            
 
