@@ -26,6 +26,8 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
         if os.path.exists(config.get('train_cnet_em')) and os.path.exists(config.get('train_qnet_em')):
             self.train_compress_net_emb = torch.load(config.get('train_cnet_em'))
             self.train_query_net_emb = torch.load(config.get('train_qnet_em'))
+            self.train_compress_net_emb = self.train_compress_net_emb.to(torch.float32)
+            self.train_query_net_emb = self.train_query_net_emb.to(torch.float32)
         else:
             self._prepare_embeddings()
             torch.save(self.train_compress_net_emb, config.get('train_cnet_em'))
