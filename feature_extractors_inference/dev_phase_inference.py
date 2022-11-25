@@ -63,7 +63,7 @@ class QryInf():
 
         text = clip.tokenize(text).to(self.device)
         with torch.no_grad():
-            text_emb = self.model.encode_text(text)
+            text_emb = self.clip_model.encode_text(text)
 
         return text_emb
 
