@@ -11,8 +11,9 @@ from tqdm import tqdm
 
 
 class QryInf():
-    def __init__(self, config):
+    def __init__(self, config, transforms=None):
         self.config  = config
+        self.transforms = transforms
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.results = list()
         self.clip_model, self.clip_preprocess = clip.load(config.get('clip_backend'), device=self.device)
@@ -27,8 +28,8 @@ class QryInf():
                 self.clip_model_fsize = 768
 
             
-            self.cnet.load_state_dict(self.config.get('clip_bknd_cnet_model_path'))
-            self.qnet.load_state_dict(self.config.get('clip_bknd_qnet_model_path'))
+            self.cnet.load_state_dict(torch.load(self.config.get('clip_bknd_cnet_model_path')))
+            self.qnet.load_state_dict(torch.load(self.config.get('clip_bknd_qnet_model_path')))
             self.cnet.eval()
             self.qnet.eval()
             self.cnet.to(self.device)
@@ -46,10 +47,10 @@ class QryInf():
         return self.clip_preprocess(image).unsqueeze(0).to(self.device)
 
     def _get_image_embedding(self, image):
-        if not image:
+        if image is None:
             return None
         with torch.no_grad():
-            image_features = self.model.encode_image(image)
+            image_features = self.clip_model.encode_image(image)
         return image_features
 
     def _preprocess_text(self, text):
@@ -88,15 +89,20 @@ class QryInf():
         print("starting predictions")
         for item in tqdm(data):
             src_img_em = self._get_image_embedding(self._download_and_preprocess_image(item['source_pid']))
-            src_img_em = src_img_em if src_img_em else torch.zeros(1,self.clip_model_fsize)
-            can_imgs = list()
+            src_img_em = src_img_em if src_img_em is not None else torch.zeros(1,self.clip_model_fsize).to(self.device)
+            can_img_em = None
             for candidate_imgs in item['candidates']:
                 can_img = self._get_image_embedding(self._download_and_preprocess_image(candidate_imgs['candidate_pid']))
-                can_img  = can_img if can_img else torch.zeros(1,self.clip_model_fsize)
-                can_imgs.append(can_img)
-            can_img_em = torch.stack(can_imgs)
+                can_img  = can_img if can_img is not None else torch.zeros(1,self.clip_model_fsize).to(self.device)
+                if can_img_em is not None:
+                    can_img_em = torch.vstack((can_img_em, can_img))
+                else:
+                    can_img_em  = can_img
+            can_img_em = can_img_em.to(torch.float32)
             text_em = self._get_text_embeddings(item['feedback1'],item['feedback2'],item['feedback3'])
             query_em = torch.cat((src_img_em, text_em), dim=1)
+            text_em = text_em.to(torch.float32)
+            query_em = query_em.to(torch.float32)
             preds = self._get_preds(can_img_em, query_em)
             for i in range(len(item['candidates'])):
                 item['candidates'][i]["score"] = round(preds[i].data.item(),2)
