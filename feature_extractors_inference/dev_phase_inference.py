@@ -35,6 +35,13 @@ class QryInf():
             self.cnet.to(self.device)
             self.qnet.to(self.device)
 
+    def _read_img_and_preprocess(self, img_id):
+        try:
+            image = Image.open(os.path.join(self.config.get('dev_img'), img_id + '.jpg'))
+        except Exception as e:
+            return None
+
+        return self.clip_preprocess(image).unsqueeze(0).to(self.device)
 
     def _download_and_preprocess_image(self, img_id):
         try:
@@ -88,11 +95,11 @@ class QryInf():
         data = [json.loads(json_item) for json_item in json_str.splitlines()]
         print("starting predictions")
         for item in tqdm(data):
-            src_img_em = self._get_image_embedding(self._download_and_preprocess_image(item['source_pid']))
+            src_img_em = self._get_image_embedding(self._read_img_and_preprocess(item['source_pid']))
             src_img_em = src_img_em if src_img_em is not None else torch.zeros(1,self.clip_model_fsize).to(self.device)
             can_img_em = None
             for candidate_imgs in item['candidates']:
-                can_img = self._get_image_embedding(self._download_and_preprocess_image(candidate_imgs['candidate_pid']))
+                can_img = self._get_image_embedding(self._read_img_and_preprocess(candidate_imgs['candidate_pid']))
                 can_img  = can_img if can_img is not None else torch.zeros(1,self.clip_model_fsize).to(self.device)
                 if can_img_em is not None:
                     can_img_em = torch.vstack((can_img_em, can_img))

@@ -7,7 +7,7 @@ config = {
     'dev_jsonl': 'query_file_released.jsonl',
     'test_csv': '',
     'train_img': '',
-    'dev_img': '',
+    'dev_img': 'data/dev_images',
     'test_img': '',
     'train_qnet_em': './data/clip_bknd/train_qnet_em.pt',
     'train_cnet_em': './data/clip_bknd/train_cnet_em.pt',
@@ -42,6 +42,9 @@ config = {
     'clip_bknd_qnet_model_path': '',
     'gal_imgs_ftrs_path': '',
     'qry_ftrs_path': '',
-    'dev_phase_res_file': 'data/dev_phase_results.jsonl'
+    'dev_phase_res_file': 'data/dev_phase_results/dev_phase_results.jsonl',
+
+    ## downloading images
+    'dev_images': 'data/dev_images',
 
 }
