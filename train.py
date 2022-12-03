@@ -82,5 +82,8 @@ opt = torch.optim.Adam(list(cnet_model.parameters()) + list(qnet_model.parameter
 
 history = joint_trainning(cnet_model, qnet_model, opt, loss, train_data_loader, val_data_loader, config.get('epochs'), device)
 
+torch.save(cnet_model.state_dict(), config.get('clip_bknd_cnet_model_path'))
+torch.save(qnet_model.state_dict(), config.get('clip_bknd_qnet_model_path'))
+
 display_loss_curve(history, "cnet and qnet loss", config.get('clip_crs_em_loss_img'), include_val_loss=config.get('split_train_into_val'))
 
