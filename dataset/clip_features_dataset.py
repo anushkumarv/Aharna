@@ -52,8 +52,10 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
     def _get_image_embedding(self, src_image, tgt_image, ntgt_image):
         src_image = self.preprocess(src_image).unsqueeze(0).to(self.device)
         tgt_image = self.preprocess(tgt_image).unsqueeze(0).to(self.device)
-        ntgt_image = self.preprocess(ntgt_image).unsqueeze(0).to(self.device)
-        all_image = torch.vstack((src_image,tgt_image,ntgt_image))
+        # ntgt_image = self.preprocess(ntgt_image).unsqueeze(0).to(self.device)
+        all_image = torch.vstack((src_image,tgt_image
+                                # ,ntgt_image
+                                ))
         with torch.no_grad():
             all_image_features = self.model.encode_image(all_image)
         return all_image_features
@@ -73,14 +75,28 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
         return text_emb
 
     def _stack_embeddings(self, all_img_emb, text_em):
-        src_img_em, tgt_ntgt_img_emb = torch.split(all_img_emb, [1,2])
-        tgt_ntgt_img_emb = tgt_ntgt_img_emb.unsqueeze(0)
+        # src_img_em, tgt_ntgt_img_emb = torch.split(all_img_emb, [1,2])
+        # tgt_ntgt_img_emb = tgt_ntgt_img_emb.unsqueeze(0)
+
+        src_img_em, tgt_img_emb = torch.split(all_img_emb, [1,1])
+        tgt_img_emb = tgt_img_emb.unsqueeze(0)
+
         query_em = torch.cat((src_img_em, text_em), dim=1).unsqueeze(0)
 
+        # if self.train_compress_net_emb is not None:
+        #     self.train_compress_net_emb = torch.vstack((self.train_compress_net_emb,tgt_ntgt_img_emb))
+        # else:
+        #     self.train_compress_net_emb = tgt_ntgt_img_emb
+
+        # if self.train_query_net_emb is not None:
+        #     self.train_query_net_emb = torch.vstack((self.train_query_net_emb, query_em))
+        # else:
+        #     self.train_query_net_emb = query_em
+
         if self.train_compress_net_emb is not None:
-            self.train_compress_net_emb = torch.vstack((self.train_compress_net_emb,tgt_ntgt_img_emb))
+            self.train_compress_net_emb = torch.vstack((self.train_compress_net_emb,tgt_img_emb))
         else:
-            self.train_compress_net_emb = tgt_ntgt_img_emb
+            self.train_compress_net_emb = tgt_img_emb
 
         if self.train_query_net_emb is not None:
             self.train_query_net_emb = torch.vstack((self.train_query_net_emb, query_em))
@@ -97,7 +113,8 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
                     break
                 all_img_emb = self._get_image_embedding(self._download_image(row['Source Image ID']), 
                                         self._download_image(row['Target Image ID']),
-                                        self._download_image(row['Non-Target Image ID']))
+                                        # self._download_image(row['Non-Target Image ID'])
+                                        None)
                 txt_em = self._get_text_embeddings(row['Feedback 1'], row['Feedback 2'], row['Feedback 3'])
                 self._stack_embeddings(all_img_emb, txt_em)
                 count += 1
