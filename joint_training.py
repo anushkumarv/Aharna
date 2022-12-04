@@ -3,7 +3,7 @@ import torch
 from torch import nn
 import time
 
-def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, train_dl, val_dl=None, epochs=10, device='cuda'):
+def joint_trainning(compress_net_model, query_net_model, optimizer, scheduler, loss_fn, train_dl, val_dl=None, epochs=10, device='cuda'):
 
     print('train() called: compress net model=%s, query net mode=%s, opt=%s(lr=%f), epochs=%d, device=%s\n' % \
           (type(compress_net_model).__name__, type(query_net_model).__name__, type(optimizer).__name__,
@@ -14,6 +14,8 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
     history['val_loss'] = []
 
     start_time_sec = time.time()
+
+    torch.autograd.detect_anomaly()
 
     for epoch in range(1, epochs+1):
 
@@ -26,24 +28,24 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
 
             optimizer.zero_grad()
 
-            cnet_x = batch[0].to(device)
-            qnet_x = batch[1].to(device)
+            qnet_x = batch[0].to(device)
+            cnet_x = batch[1].to(device)
             y = batch[2].to(device)
-            cnet_y = compress_net_model(cnet_x)
+            
             qnet_y = query_net_model(qnet_x)
-            # cos = nn.CosineSimilarity(dim=2, eps=1e-6)
-            # y_hat = cos(cnet_y, qnet_y)
-            batch_size = len(cnet_x)
-            # y = torch.tensor([1.0,0.0]).repeat(batch_size, 1).to(device)
-            # loss = loss_fn(y, y_hat)
+            cnet_y = compress_net_model(cnet_x)
+
             loss = loss_fn(qnet_y, cnet_y, y)
             loss.backward()
+
             optimizer.step()
 
-            train_loss  += loss.data.item() * batch_size
+            train_loss  += loss.data.item() * len(qnet_x) # len(qnet_x) to calculate batch size
 
         train_loss  = train_loss / len(train_dl.dataset)
 
+        if scheduler:
+            scheduler.step()
 
         # --- EVALUATE ON VALIDATION SET -------------------------------------
         if val_dl:
@@ -52,18 +54,15 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
             val_loss       = 0.0
 
             for batch in val_dl:
-                cnet_x = batch[0].to(device)
-                qnet_x = batch[1].to(device)
-                cnet_y = compress_net_model(cnet_x)
-                qnet_y = query_net_model(qnet_x)
+                qnet_x = batch[0].to(device)
+                cnet_x = batch[1].to(device)
                 y = batch[2].to(device)
-                # cos = nn.CosineSimilarity(dim=2, eps=1e-6)
-                # y_hat = cos(cnet_y, qnet_y)
-                batch_size = len(cnet_x)
-                # y = torch.tensor([1.0,0.0]).repeat(batch_size, 1).to(device)
-                # loss = loss_fn(y, y_hat)
+                
+                qnet_y = query_net_model(qnet_x)
+                cnet_y = compress_net_model(cnet_x)
+
                 loss = loss_fn(qnet_y, cnet_y, y)
-                val_loss  += loss.data.item() * batch_size
+                val_loss  += loss.data.item() * len(qnet_x)
 
             val_loss = val_loss / len(val_dl.dataset)
 

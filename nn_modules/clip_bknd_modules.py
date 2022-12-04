@@ -12,8 +12,8 @@ class ClipBackendB32QueryNet(nn.Module):
                                         nn.ReLU())
 
     def forward(self, x):
-        # return nn.functional.normalize(self.query_net(x))
-        return self.query_net(x)
+        return nn.functional.normalize(self.query_net(x), dim=1)
+        # return self.query_net(x)
 
 
 class ClipBackendB32CompressNet(nn.Module):
@@ -24,8 +24,8 @@ class ClipBackendB32CompressNet(nn.Module):
                                             nn.ReLU())
 
     def forward(self, x):
-        # return nn.functional.normalize(self.compress_net(x))
-        return self.compress_net(x)
+        return nn.functional.normalize(self.compress_net(x), dim=1)
+        # return self.compress_net(x)
 
 
 class ClipBackendL14QueryNet(nn.Module):
