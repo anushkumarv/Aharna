@@ -4,6 +4,7 @@ data/test_images
 data/clip_train
 data/dev_phase_results
 data/dev_images.zip
+data/train_images.zip
 
 __pycache__
 .DS_Store

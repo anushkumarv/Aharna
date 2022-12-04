@@ -32,9 +32,10 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
             self._prepare_embeddings()
             torch.save(self.train_compress_net_emb, config.get('train_cnet_em'))
             torch.save(self.train_query_net_emb, config.get('train_qnet_em'))
+        self.target = torch.tensor([1.0,-1.0]).repeat(len(self.train_compress_net_emb) // 2).to(self.device)
 
     def __getitem__(self, index):
-        return self.train_compress_net_emb[index], self.train_query_net_emb[index]
+        return self.train_compress_net_emb[index], self.train_query_net_emb[index], self.target[index]
 
     def __len__(self):
         return len(self.train_compress_net_emb)
@@ -86,12 +87,15 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
 
     def _stack_embeddings(self, all_img_emb, text_em):
         src_img_em, tgt_ntgt_img_emb = torch.split(all_img_emb, [1,2])
-        tgt_ntgt_img_emb = tgt_ntgt_img_emb.unsqueeze(0)
+        tgt_ntgt_img_emb = tgt_ntgt_img_emb
 
         # src_img_em, tgt_img_emb = torch.split(all_img_emb, [1,1])
         # tgt_img_emb = tgt_img_emb.unsqueeze(0)
 
-        query_em = torch.cat((src_img_em, text_em), dim=1).unsqueeze(0)
+        query_em = torch.cat((src_img_em, text_em), dim=1)
+
+        #repeat for training with cosine embedding loss
+        query_em = torch.vstack((query_em, query_em))
 
         if self.train_compress_net_emb is not None:
             self.train_compress_net_emb = torch.vstack((self.train_compress_net_emb,tgt_ntgt_img_emb))
