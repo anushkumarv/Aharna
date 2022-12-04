@@ -23,7 +23,7 @@ config = {
     'shuffle_data': False,
     'split_train_into_val': True,
     'validation_split': 0.2,
-    'epochs': 50,
+    'epochs': 10,
 
     ## separator for text
     'text_sep': ' and ',
@@ -39,8 +39,8 @@ config = {
     ## inference
     'use_clip_aprch_inf': True,
     'use_resnet_aprch_inf': False,
-    'clip_bknd_cnet_model_path': '',
-    'clip_bknd_qnet_model_path': '',
+    'clip_bknd_cnet_model_path': 'data/clip_train/cnet_baseline.pt',
+    'clip_bknd_qnet_model_path': 'data/clip_train/qnet_baseline.pt',
     'gal_imgs_ftrs_path': '',
     'qry_ftrs_path': '',
     'dev_phase_res_file': 'data/dev_phase_results/dev_phase_results.jsonl',
