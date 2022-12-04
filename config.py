@@ -6,7 +6,7 @@ config = {
     'train_csv': 'apparel_train_annotation.csv',
     'dev_jsonl': 'query_file_released.jsonl',
     'test_csv': '',
-    'train_img': '',
+    'train_img': 'data/train_images',
     'dev_img': 'data/dev_images',
     'test_img': '',
     'train_qnet_em': './data/clip_bknd/train_qnet_em.pt',
