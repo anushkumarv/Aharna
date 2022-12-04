@@ -9,10 +9,12 @@ config = {
     'train_img': 'data/train_images',
     'dev_img': 'data/dev_images',
     'test_img': '',
-    'train_qnet_em': './data/clip_bknd/train_qnet_em.pt',
-    'train_cnet_em': './data/clip_bknd/train_cnet_em.pt',
+    'train_qnet_emb': './data/clip_bknd/train_qnet_emb.pt',
+    'train_tgt_img_emb': './data/clip_bknd/train_tgt_img_emb.pt',
+    'train_ntgt_img_emb': './data/clip_bknd/train_ntgt_img_emb.pt',
     'cap_datapoints': True,
     'max_datapoints': 100,
+    'read_from_folder': False,
 
     ## hyperparameters
     'batch_size': 64,
