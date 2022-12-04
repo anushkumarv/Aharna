@@ -21,24 +21,23 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
         self.transforms = transforms
         self.device = "cpu"
         self.model, self.preprocess = clip.load(config.get('clip_backend'), device=self.device)
-        self.train_tgt_img_emb = None
-        self.train_ntgt_img_emb = None
+        self.train_cnet_emb = None
         self.train_qnet_emb = None
-        if os.path.exists(config.get('train_tgt_img_emb')) and os.path.exists(config.get('train_ntgt_img_emb')) and os.path.exists(config.get('train_qnet_emb')):
-            self.train_tgt_img_emb = torch.load(config.get('train_tgt_img_emb')).to(torch.float32)
-            self.train_ntgt_img_emb = torch.load(config.get('train_ntgt_img_emb')).to(torch.float32)
+        self.target_lbl_emb = None
+        if os.path.exists(config.get('train_cnet_emb')) and os.path.exists(config.get('train_qnet_emb')):
+            self.train_cnet_emb = torch.load(config.get('train_cnet_emb')).to(torch.float32)
             self.train_qnet_emb = torch.load(config.get('train_qnet_emb')).to(torch.float32)
+            self.target_lbl_emb = torch.tensor([1,-1]).repeat(len(self.train_cnet_emb) // 2).to(torch.float32)
         else:
             self._prepare_embeddings()
-            torch.save(self.train_tgt_img_emb, config.get('train_tgt_img_emb'))
-            torch.save(self.train_ntgt_img_emb, config.get('train_ntgt_img_emb'))
+            torch.save(self.train_cnet_emb, config.get('train_cnet_emb'))
             torch.save(self.train_qnet_emb, config.get('train_qnet_emb'))
 
     def __getitem__(self, index):
-        return self.train_qnet_emb[index], self.train_tgt_img_emb[index], self.train_ntgt_img_emb[index]
+        return self.train_cnet_emb[index], self.train_qnet_emb[index], self.target_lbl_emb[index]
 
     def __len__(self):
-        return len(self.train_qnet_emb)
+        return len(self.train_cnet_emb)
 
     def _read_img(self, img_id):
         try:
@@ -84,23 +83,27 @@ class PrdFeedbackClipBkdDataset(data.Dataset):
         return text_emb
 
     def _stack_embeddings(self, all_img_emb, text_em):
-        src_img_em, tgt_img_emb, ntgt_img_emb = torch.split(all_img_emb, [1,1,1])
+        src_img_em, tgt_ntgt_img_emb = torch.split(all_img_emb, [1,2])
         query_em = torch.cat((src_img_em, text_em), dim=1)
+        # repeating as we need the same query for target and non target
+        query_em = torch.cat((query_em, query_em))
+
+        target_lbl = torch.tensor([1,-1])
 
         if self.train_qnet_emb is not None:
             self.train_qnet_emb = torch.vstack((self.train_qnet_emb, query_em))
         else:
             self.train_qnet_emb = query_em
 
-        if self.train_tgt_img_emb is not None:
-            self.train_tgt_img_emb = torch.vstack((self.train_tgt_img_emb, tgt_img_emb))
+        if self.train_cnet_emb is not None:
+            self.train_cnet_emb = torch.vstack((self.train_cnet_emb, tgt_ntgt_img_emb))
         else:
-            self.train_tgt_img_emb = tgt_img_emb
+            self.train_cnet_emb = tgt_ntgt_img_emb
 
-        if self.train_ntgt_img_emb is not None:
-            self.train_ntgt_img_emb = torch.vstack((self.train_ntgt_img_emb, ntgt_img_emb))
+        if self.target_lbl_emb is not None:
+            self.target_lbl_emb = torch.cat((self.target_lbl_emb, target_lbl))
         else:
-            self.train_ntgt_img_emb = ntgt_img_emb
+            self.target_lbl_emb = target_lbl
 
     def _prepare_embeddings(self):
         src_file = os.path.join(self.config.get('data_root'), self.config.get('train_csv'))
