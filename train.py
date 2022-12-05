@@ -80,7 +80,7 @@ cnet_model.to(device=device)
 qnet_model.to(device=device)
 opt = torch.optim.Adam(list(cnet_model.parameters()) + list(qnet_model.parameters()), lr = config.get('learning_rate'))
 
-history = joint_trainning(cnet_model, qnet_model, opt, loss, train_data_loader, val_data_loader, config.get('epochs'), device)
+history = joint_trainning(cnet_model, qnet_model, opt, None, loss, train_data_loader, val_data_loader, config.get('epochs'), device)
 
 torch.save(cnet_model.state_dict(), config.get('clip_bknd_cnet_model_path'))
 torch.save(qnet_model.state_dict(), config.get('clip_bknd_qnet_model_path'))

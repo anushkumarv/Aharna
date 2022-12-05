@@ -28,8 +28,8 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, scheduler, l
 
             optimizer.zero_grad()
 
-            qnet_x = batch[0].to(device)
-            cnet_x = batch[1].to(device)
+            cnet_x = batch[0].to(device)
+            qnet_x = batch[1].to(device)
             y = batch[2].to(device)
             
             qnet_y = query_net_model(qnet_x)
@@ -54,8 +54,8 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, scheduler, l
             val_loss       = 0.0
 
             for batch in val_dl:
-                qnet_x = batch[0].to(device)
-                cnet_x = batch[1].to(device)
+                cnet_x = batch[0].to(device)
+                qnet_x = batch[1].to(device)
                 y = batch[2].to(device)
                 
                 qnet_y = query_net_model(qnet_x)
