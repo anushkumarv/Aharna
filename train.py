@@ -73,7 +73,7 @@ else:
 
 print("starting training")
 # loss = nn.CrossEntropyLoss()
-loss = nn.CosineEmbeddingLoss()
+loss = nn.CosineEmbeddingLoss(reduction='sum')
 cnet_model = clip_bknd_modules.ClipBackendB32CompressNet()
 qnet_model = clip_bknd_modules.ClipBackendB32QueryNet()
 cnet_model.to(device=device)
