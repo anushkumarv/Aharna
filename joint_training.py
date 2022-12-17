@@ -1,3 +1,4 @@
+from config import config
 import torch
 from torch import nn
 import time
@@ -10,9 +11,7 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
 
     history = {} # Collects per-epoch loss and acc like Keras' fit().
     history['loss'] = []
-    # history['val_loss'] = []
-    # history['acc'] = []
-    # history['val_acc'] = []
+    history['val_loss'] = []
 
     start_time_sec = time.time()
 
@@ -29,13 +28,15 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
 
             cnet_x = batch[0].to(device)
             qnet_x = batch[1].to(device)
+            y = batch[2].to(device)
             cnet_y = compress_net_model(cnet_x)
             qnet_y = query_net_model(qnet_x)
-            cos = nn.CosineSimilarity(dim=2, eps=1e-6)
-            y_hat = cos(cnet_y, qnet_y)
+            # cos = nn.CosineSimilarity(dim=2, eps=1e-6)
+            # y_hat = cos(cnet_y, qnet_y)
             batch_size = len(cnet_x)
-            y = torch.tensor([1.0,0.0]).repeat(batch_size, 1).to(device)
-            loss = loss_fn(y, y_hat)
+            # y = torch.tensor([1.0,0.0]).repeat(batch_size, 1).to(device)
+            # loss = loss_fn(y, y_hat)
+            loss = loss_fn(qnet_y, cnet_y, y)
             loss.backward()
             optimizer.step()
 
@@ -45,31 +46,36 @@ def joint_trainning(compress_net_model, query_net_model, optimizer, loss_fn, tra
 
 
         # --- EVALUATE ON VALIDATION SET -------------------------------------
-        # if val_dl:
-        #     model.eval()
-        #     val_loss       = 0.0
-        #     num_val_correct  = 0
-        #     num_val_examples = 0
+        if val_dl:
+            compress_net_model.eval()
+            query_net_model.eval()
+            val_loss       = 0.0
 
-        #     for batch in val_dl:
+            for batch in val_dl:
+                cnet_x = batch[0].to(device)
+                qnet_x = batch[1].to(device)
+                cnet_y = compress_net_model(cnet_x)
+                qnet_y = query_net_model(qnet_x)
+                y = batch[2].to(device)
+                # cos = nn.CosineSimilarity(dim=2, eps=1e-6)
+                # y_hat = cos(cnet_y, qnet_y)
+                batch_size = len(cnet_x)
+                # y = torch.tensor([1.0,0.0]).repeat(batch_size, 1).to(device)
+                # loss = loss_fn(y, y_hat)
+                loss = loss_fn(qnet_y, cnet_y, y)
+                val_loss  += loss.data.item() * batch_size
 
-        #         x    = batch[0].to(device)
-        #         y    = batch[1].to(device)
-        #         y    = torch.unsqueeze(y, 1)
-        #         yhat = model(x)
-        #         loss = loss_fn(yhat, y)
-
-        #         val_loss  += loss.data.item() * x.size(0)
-
-        #     val_loss = val_loss / len(val_dl.dataset)
+            val_loss = val_loss / len(val_dl.dataset)
 
 
         if epoch == 1 or epoch % 2 == 0:
-            print('Epoch %3d/%3d, train loss: %5.2f' % \
-                (epoch, epochs, train_loss))
+            log_stmt = 'Epoch %3d/%3d, train loss: %5.2f' % (epoch, epochs, train_loss)
+            if val_dl:
+                log_stmt = log_stmt + ' val loss: %5.2f' % (val_loss)
+            print(log_stmt)
 
         history['loss'].append(train_loss)
-        #     history['val_loss'].append(val_loss)
+        history['val_loss'].append(val_loss)
 
     # END OF TRAINING LOOP
 
